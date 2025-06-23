@@ -6,7 +6,6 @@ import { CreateInvoiceDto } from '../dto/create-invoice.dto';
 import { UpdateInvoiceDto } from '../dto/update-invoice.dto';
 import { FilterInvoicesDto } from '../dto/filter-invoice.dto';
 import { Invoice, InvoiceStatus } from '../entities/invoice.entity';
-import { Supplier } from '../../supplier/entities/supplier.entity';
 
 @Injectable()
 export class InvoiceService {
@@ -14,9 +13,19 @@ export class InvoiceService {
 
   /** CREATE */
   async create(dto: CreateInvoiceDto): Promise<Invoice> {
+
+      const payload = {
+      date:        dto.date,
+      amount:      dto.amount,
+      status:      dto.status,
+      supplier_id: dto.supplierId,
+      type:        dto.type,
+      vat:         dto.vat,
+    };
+
     const { data, error } = await this.supabase
-      .from('invoices')
-      .insert({ ...dto })
+      .from('invoice')
+      .insert([payload])
       .select('*')
       .single();
 
@@ -32,7 +41,7 @@ export class InvoiceService {
 
     // armamos query HTTP a Supabase
     let qb = this.supabase
-      .from('invoices')
+      .from('invoice')
       .select('*, supplier(*)', { count: 'exact' })
       .order('date', { ascending: false })
       .range(from, to);
@@ -41,7 +50,7 @@ export class InvoiceService {
       ? qb.in('status', status)
       : qb.eq('status', status);
     if (type)       qb = qb.eq('type', type);
-    if (supplierId) qb = qb.eq('supplierId', supplierId);
+    if (supplierId) qb = qb.eq('supplier_id', supplierId);
     if (fromDate)   qb = qb.gte('date', fromDate);
     if (toDate)     qb = qb.lte('date', toDate);
 
@@ -54,7 +63,7 @@ export class InvoiceService {
   /** READ one by id */
   async findOne(id: number): Promise<Invoice> {
     const { data, error } = await this.supabase
-      .from('invoices')
+      .from('invoice')
       .select('*, supplier(*)')
       .eq('id', id)
       .single();
@@ -66,8 +75,15 @@ export class InvoiceService {
   /** UPDATE */
   async update(id: number, dto: UpdateInvoiceDto): Promise<Invoice> {
     const { data, error } = await this.supabase
-      .from('invoices')
-      .update({ ...dto })
+      .from('invoice')
+      .update({ 
+        date: dto.date,
+        amount: dto.amount,
+        status: dto.status,
+        type: dto.type,
+        vat: dto.vat,
+        supplier_id: dto.supplierId,  // <-- aquí también
+      })  
       .eq('id', id)
       .select('*')
       .single();
@@ -79,7 +95,7 @@ export class InvoiceService {
   /** DELETE */
   async remove(id: number): Promise<void> {
     const { error } = await this.supabase
-      .from('invoices')
+      .from('invoice')
       .delete()
       .eq('id', id);
 
@@ -89,7 +105,7 @@ export class InvoiceService {
   /** MARK AS PAID */
   async markAsPaid(id: number, paymentDate: string): Promise<Invoice> {
     const { data, error } = await this.supabase
-      .from('invoices')
+      .from('invoice')
       .update({ status: InvoiceStatus.PAID, paymentDate })
       .eq('id', id)
       .select('*')

@@ -1,10 +1,12 @@
 import {
   IsDateString,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { InvoiceStatus } from '../entities/invoice.entity';
@@ -24,10 +26,6 @@ export class CreateInvoiceDto {
   @IsNotEmpty()
   supplierId: number;
 
-  @IsString()
-  @IsNotEmpty()
-  description: string;
-
   @IsNumber()
   amount: number;
 
@@ -45,4 +43,7 @@ export class CreateInvoiceDto {
   @IsOptional()
   @IsEnum(InvoiceStatus)
   status?: InvoiceStatus;
+
+  @IsDateString()
+  date?: string; 
 }

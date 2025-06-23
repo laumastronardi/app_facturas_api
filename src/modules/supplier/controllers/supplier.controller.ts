@@ -10,12 +10,12 @@ import {
   Put,
   ParseIntPipe,
 } from '@nestjs/common';
-import { SuppliersService } from '../services/supplier.service';
+import { SupplierService } from '../services/supplier.service';
 import { CreateSupplierDto } from '../dto/create-supplier.dto';
 import { UpdateSupplierDto } from '../dto/update-supplier.dto';
 @Controller('suppliers')
-export class SuppliersController {
-  constructor(private readonly suppliersService: SuppliersService) {}
+export class SupplierController {
+  constructor(private readonly supplierService: SupplierService) {}
 
   /** Health check: debe ir antes de la ruta dinámica :id */
   @Get('health')
@@ -26,19 +26,19 @@ export class SuppliersController {
   /** CREATE */
   @Post()
   create(@Body() dto: CreateSupplierDto) {
-    return this.suppliersService.create(dto);
+    return this.supplierService.create(dto);
   }
 
   /** READ ALL */
   @Get()
   findAll() {
-    return this.suppliersService.findAll();
+    return this.supplierService.findAll();
   }
 
   /** READ ONE */
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.suppliersService.findOne(id);
+    return this.supplierService.findOne(id);
   }
 
   /** UPDATE */
@@ -47,12 +47,12 @@ export class SuppliersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateSupplierDto
   ) {
-    return this.suppliersService.update(id, dto);
+    return this.supplierService.update(id, dto);
   }
 
   /** DELETE */
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.suppliersService.remove(id);
+    return this.supplierService.remove(id);
   }
 }

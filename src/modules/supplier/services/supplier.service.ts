@@ -4,13 +4,13 @@ import { CreateSupplierDto } from '../dto/create-supplier.dto';
 import { Supplier } from '../entities/supplier.entity';
 import { UpdateSupplierDto } from '../dto/update-supplier.dto';
 @Injectable()
-export class SuppliersService {
+export class SupplierService {
   constructor(private readonly supabase: SupabaseService) {}
 
   /** CREATE */
   async create(dto: CreateSupplierDto): Promise<Supplier> {
     const { data, error } = await this.supabase
-      .from('suppliers')
+      .from('supplier')
       .insert(dto)
       .select('*')
       .single();
@@ -22,7 +22,7 @@ export class SuppliersService {
   /** READ ALL */
   async findAll(): Promise<Supplier[]> {
     const { data, error } = await this.supabase
-      .from('suppliers')
+      .from('supplier')
       .select('*');
 
     if (error) throw new BadRequestException(error.message);
@@ -32,7 +32,7 @@ export class SuppliersService {
   /** READ ONE */
   async findOne(id: number): Promise<Supplier> {
     const { data, error } = await this.supabase
-      .from('suppliers')
+      .from('supplier')
       .select('*')
       .eq('id', id)
       .single();
@@ -46,7 +46,7 @@ export class SuppliersService {
   /** UPDATE */
   async update(id: number, dto: UpdateSupplierDto): Promise<Supplier> {
     const { data, error } = await this.supabase
-      .from('suppliers')
+      .from('supplier')
       .update(dto)
       .eq('id', id)
       .select('*')
@@ -59,7 +59,7 @@ export class SuppliersService {
   /** DELETE */
   async remove(id: number): Promise<void> {
     const { error } = await this.supabase
-      .from('suppliers')
+      .from('supplier')
       .delete()
       .eq('id', id);
 
