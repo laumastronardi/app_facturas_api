@@ -5,7 +5,6 @@ import { faker } from '@faker-js/faker';
 import { Invoice, InvoiceStatus } from './src/modules/invoice/entities/invoice.entity';
 import { Supplier } from './src/modules/supplier/entities/supplier.entity';
 import { InvoiceType } from './src/modules/invoice/dto/create-invoice.dto';
-import { databaseConfig } from 'src/modules/config/database.config';
 
 const AppDataSource = new DataSource(databaseConfig);
 
