@@ -31,4 +31,9 @@ export class SupplierController {
   remove(@Param('id') id: string) {
     return this.supplierService.remove(+id);
   }
+
+  @Get('health')
+  health() {
+    return { status: 'OK' };
+  }
 }
