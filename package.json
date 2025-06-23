@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "vercel-build": "npm run build",
     "start": "nest start",
     "seed": "ts-node -r tsconfig-paths/register seed.ts",
     "start:dev": "nest start --watch",
