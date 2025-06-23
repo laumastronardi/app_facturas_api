@@ -1,10 +1,10 @@
-import { IsOptional, IsString, IsNumber, IsIn, IsDateString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsOptional, IsString, IsNumber, IsIn, IsDateString, IsArray, IsEnum, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class FilterInvoicesDto {
   @IsOptional()
-  @IsIn(['to_pay', 'prepared', 'paid'])
-  status?: string;
+  @IsEnum(['to_pay','prepared','paid'], { each: true })
+  status?: string | string[];
 
   @IsOptional()
   @IsIn(['A', 'X'])
@@ -13,7 +13,7 @@ export class FilterInvoicesDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  supplierId?: number;
+  supplierId?: number;  
 
   @IsOptional()
   @IsDateString()
@@ -25,11 +25,11 @@ export class FilterInvoicesDto {
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsNumber() @Min(1)
   page?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsNumber() @Min(1)
   limit?: number;
 }

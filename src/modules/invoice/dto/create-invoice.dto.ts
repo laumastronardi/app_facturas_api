@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { InvoiceStatus } from '../entities/invoice.entity';
 
 export enum InvoiceType {
   A = 'A',
@@ -40,4 +41,8 @@ export class CreateInvoiceDto {
   @IsOptional()
   @IsDateString()
   paymentDate?: string; 
+
+  @IsOptional()
+  @IsEnum(InvoiceStatus)
+  status?: InvoiceStatus;
 }

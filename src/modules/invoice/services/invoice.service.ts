@@ -35,37 +35,29 @@ export class InvoiceService {
   async findAll(filters: FilterInvoicesDto & { page?: number; limit?: number }) {
     const { status, type, supplierId, fromDate, toDate, page = 1, limit = 10 } = filters;
 
-    const query = this.invoiceRepo
+    const qb = this.invoiceRepo
       .createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.supplier', 'supplier')
-      .orderBy('invoice.date', 'DESC')
-      .skip((page - 1) * limit)
+      .orderBy('invoice.date', 'DESC');
+
+    let statusArray: string[] | undefined;
+    if (status) {
+      statusArray = Array.isArray(status)
+        ? status
+        : (status as string).split(',').map((s) => s.trim());
+    }
+    if (statusArray && statusArray.length > 0) {
+      qb.andWhere('invoice.status IN (:...statuses)', { statuses: statusArray });
+    }
+    if (type)       qb.andWhere('invoice.type = :type',       { type });
+    if (supplierId) qb.andWhere('invoice.supplierId = :supplierId', { supplierId });
+    if (fromDate)   qb.andWhere('invoice.date >= :fromDate',   { fromDate });
+    if (toDate)     qb.andWhere('invoice.date <= :toDate',     { toDate });
+
+    qb.skip((page - 1) * limit)
       .take(limit);
 
-    if (status) {
-      query.andWhere('invoice.status = :status', { status });
-    }
-
-    if (type) {
-      query.andWhere('invoice.type = :type', { type });
-    }
-
-    if (supplierId) {
-      query.andWhere('invoice.supplierId = :supplierId', { supplierId });
-    }
-
-    if (fromDate) {
-      query.andWhere('invoice.date >= :fromDate', { fromDate });
-    }
-
-    if (toDate) {
-      query.andWhere('invoice.date <= :toDate', { toDate });
-    }
-
-    const [data, total] = await query
-    .skip((page - 1) * limit)
-    .take(limit)
-    .getManyAndCount();
+    const [data, total] = await qb.getManyAndCount();
 
     return buildPaginatedResponse(data, total, page, limit);
   }
@@ -84,10 +76,7 @@ export class InvoiceService {
   }
 
   async update(id: number, dto: UpdateInvoiceDto): Promise<Invoice> {
-    const invoice = await this.invoiceRepo.preload({
-      id,
-      ...dto,
-    });
+    const invoice = await this.invoiceRepo.preload({id, ...dto});
 
     if (!invoice) {
       throw new NotFoundException(`Invoice with id ${id} not found`);

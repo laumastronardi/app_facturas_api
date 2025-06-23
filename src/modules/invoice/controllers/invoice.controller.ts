@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query, Patch, ParseIntPipe } from '@nestjs/common';
 import { InvoiceService } from '../services/invoice.service';
 import { CreateInvoiceDto } from '../dto/create-invoice.dto';
 import { UpdateInvoiceDto } from '../dto/update-invoice.dto';
@@ -15,9 +15,13 @@ export class InvoiceController {
   }
 
   @Get()
-  findAll(@Query() filters: FilterInvoicesDto) {
-    return this.invoiceService.findAll(filters);
-  } 
+  findAll(
+    @Query()        filters: Omit<FilterInvoicesDto,'page'|'limit'>,
+    @Query('page',  ParseIntPipe)   page: number = 1,
+    @Query('limit', ParseIntPipe)   limit: number = 10,
+  ) {
+    return this.invoiceService.findAll({ ...filters, page, limit });
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -25,6 +29,7 @@ export class InvoiceController {
   }
 
   @Put(':id')
+  @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateInvoiceDto) {
     return this.invoiceService.update(+id, dto);
   }
