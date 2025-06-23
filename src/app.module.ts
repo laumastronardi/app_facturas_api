@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { SupplierModule } from './modules/supplier/supplier.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
-import { databaseConfig } from './modules/config/database.config';
-import { DatabaseModule } from './database.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
