@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
 import { SupplierModule } from './modules/supplier/supplier.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
-import { DatabaseModule } from './database/database.module';
+import { SupabaseModule } from './supabase/supabase.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    DatabaseModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env'],  // o el path correcto a tu .env
+    }),
+    SupabaseModule,
     SupplierModule,
     InvoiceModule,
   ]

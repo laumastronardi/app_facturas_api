@@ -1,102 +1,101 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Invoice, InvoiceStatus } from '../entities/invoice.entity';
+// src/invoices/invoices.service.ts
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { buildPaginatedResponse } from 'src/common/utils/paginate-response';
+import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateInvoiceDto } from '../dto/create-invoice.dto';
 import { UpdateInvoiceDto } from '../dto/update-invoice.dto';
-import { Supplier } from '../../supplier/entities/supplier.entity';
 import { FilterInvoicesDto } from '../dto/filter-invoice.dto';
-import { buildPaginatedResponse } from 'src/common/utils/paginate-response';
+import { Invoice, InvoiceStatus } from '../entities/invoice.entity';
+import { Supplier } from '../../supplier/entities/supplier.entity';
 
 @Injectable()
 export class InvoiceService {
-  constructor(
-    @InjectRepository(Invoice)
-    private invoiceRepo: Repository<Invoice>,
+  constructor(private readonly supabase: SupabaseService) {}
 
-    @InjectRepository(Supplier)
-    private supplierRepo: Repository<Supplier>,
-  ) {}
-
+  /** CREATE */
   async create(dto: CreateInvoiceDto): Promise<Invoice> {
-    const supplier = await this.supplierRepo.findOneBy({ id: dto.supplierId });
-    if (!supplier) {
-      throw new NotFoundException(`Supplier with id ${dto.supplierId} not found`);
-    }
+    const { data, error } = await this.supabase
+      .from('invoices')
+      .insert({ ...dto })
+      .select('*')
+      .single();
 
-    const invoice = this.invoiceRepo.create({
-      ...dto,
-      supplier,
-    });
-
-    return this.invoiceRepo.save(invoice);
+    if (error) throw new BadRequestException(error.message);
+    return data;
   }
 
+  /** LIST with filters + pagination */
   async findAll(filters: FilterInvoicesDto & { page?: number; limit?: number }) {
     const { status, type, supplierId, fromDate, toDate, page = 1, limit = 10 } = filters;
+    const from = (page - 1) * limit;
+    const to   = page * limit - 1;
 
-    const qb = this.invoiceRepo
-      .createQueryBuilder('invoice')
-      .leftJoinAndSelect('invoice.supplier', 'supplier')
-      .orderBy('invoice.date', 'DESC');
+    // armamos query HTTP a Supabase
+    let qb = this.supabase
+      .from('invoices')
+      .select('*, supplier(*)', { count: 'exact' })
+      .order('date', { ascending: false })
+      .range(from, to);
 
-    let statusArray: string[] | undefined;
-    if (status) {
-      statusArray = Array.isArray(status)
-        ? status
-        : (status as string).split(',').map((s) => s.trim());
-    }
-    if (statusArray && statusArray.length > 0) {
-      qb.andWhere('invoice.status IN (:...statuses)', { statuses: statusArray });
-    }
-    if (type)       qb.andWhere('invoice.type = :type',       { type });
-    if (supplierId) qb.andWhere('invoice.supplierId = :supplierId', { supplierId });
-    if (fromDate)   qb.andWhere('invoice.date >= :fromDate',   { fromDate });
-    if (toDate)     qb.andWhere('invoice.date <= :toDate',     { toDate });
+    if (status)     qb = Array.isArray(status)
+      ? qb.in('status', status)
+      : qb.eq('status', status);
+    if (type)       qb = qb.eq('type', type);
+    if (supplierId) qb = qb.eq('supplierId', supplierId);
+    if (fromDate)   qb = qb.gte('date', fromDate);
+    if (toDate)     qb = qb.lte('date', toDate);
 
-    qb.skip((page - 1) * limit)
-      .take(limit);
+    const { data, error, count } = await qb;
+    if (error) throw new BadRequestException(error.message);
 
-    const [data, total] = await qb.getManyAndCount();
-
-    return buildPaginatedResponse(data, total, page, limit);
+    return buildPaginatedResponse(data ?? [], count ?? 0, page, limit);
   }
 
+  /** READ one by id */
   async findOne(id: number): Promise<Invoice> {
-    const invoice = await this.invoiceRepo.findOne({
-      where: { id },
-      relations: ['supplier'],
-    });
+    const { data, error } = await this.supabase
+      .from('invoices')
+      .select('*, supplier(*)')
+      .eq('id', id)
+      .single();
 
-    if (!invoice) {
-      throw new NotFoundException(`Invoice with id ${id} not found`);
-    }
-
-    return invoice;
+    if (error || !data) throw new NotFoundException(`Invoice with id ${id} not found`);
+    return data;
   }
 
+  /** UPDATE */
   async update(id: number, dto: UpdateInvoiceDto): Promise<Invoice> {
-    const invoice = await this.invoiceRepo.preload({id, ...dto});
+    const { data, error } = await this.supabase
+      .from('invoices')
+      .update({ ...dto })
+      .eq('id', id)
+      .select('*')
+      .single();
 
-    if (!invoice) {
-      throw new NotFoundException(`Invoice with id ${id} not found`);
-    }
-
-    return this.invoiceRepo.save(invoice);
+    if (error) throw new NotFoundException(`Invoice with id ${id} not found`);
+    return data;
   }
 
+  /** DELETE */
   async remove(id: number): Promise<void> {
-    const invoice = await this.findOne(id);
-    await this.invoiceRepo.remove(invoice);
+    const { error } = await this.supabase
+      .from('invoices')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw new NotFoundException(`Invoice with id ${id} not found`);
   }
 
-  async markAsPaid(id: number, date: string): Promise<Invoice> {
-    const invoice = await this.invoiceRepo.findOneBy({ id });
-    if (!invoice) throw new NotFoundException('Invoice not found');
+  /** MARK AS PAID */
+  async markAsPaid(id: number, paymentDate: string): Promise<Invoice> {
+    const { data, error } = await this.supabase
+      .from('invoices')
+      .update({ status: InvoiceStatus.PAID, paymentDate })
+      .eq('id', id)
+      .select('*')
+      .single();
 
-    invoice.status = InvoiceStatus.PAID;
-    invoice.paymentDate = new Date(date);
-    return this.invoiceRepo.save(invoice);
+    if (error) throw new NotFoundException(`Invoice with id ${id} not found`);
+    return data;
   }
-
 }

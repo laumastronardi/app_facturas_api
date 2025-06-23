@@ -4,9 +4,10 @@ import { Invoice } from './entities/invoice.entity';
 import { InvoiceService } from './services/invoice.service';
 import { InvoiceController } from './controllers/invoice.controller';
 import { Supplier } from '../supplier/entities/supplier.entity';
+import { SupabaseModule } from 'src/supabase/supabase.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Invoice, Supplier])],
+  imports: [SupabaseModule],
   controllers: [InvoiceController],
   providers: [InvoiceService],
 })

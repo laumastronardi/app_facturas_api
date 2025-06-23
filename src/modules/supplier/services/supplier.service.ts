@@ -1,48 +1,68 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Supplier } from '../entities/supplier.entity';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateSupplierDto } from '../dto/create-supplier.dto';
+import { Supplier } from '../entities/supplier.entity';
 import { UpdateSupplierDto } from '../dto/update-supplier.dto';
-
 @Injectable()
-export class SupplierService {
-  constructor(
-    @InjectRepository(Supplier)
-    private supplierRepository: Repository<Supplier>,
-  ) {}
+export class SuppliersService {
+  constructor(private readonly supabase: SupabaseService) {}
 
-  create(dto: CreateSupplierDto) {
-    const supplier = this.supplierRepository.create(dto);
-    return this.supplierRepository.save(supplier);
+  /** CREATE */
+  async create(dto: CreateSupplierDto): Promise<Supplier> {
+    const { data, error } = await this.supabase
+      .from('suppliers')
+      .insert(dto)
+      .select('*')
+      .single();
+
+    if (error) throw new BadRequestException(error.message);
+    return data;
   }
 
-  findAll() {
-    return this.supplierRepository.find();
+  /** READ ALL */
+  async findAll(): Promise<Supplier[]> {
+    const { data, error } = await this.supabase
+      .from('suppliers')
+      .select('*');
+
+    if (error) throw new BadRequestException(error.message);
+    return data;
   }
 
-  findOne(id: number) {
-    return this.supplierRepository.findOneBy({ id });
-  }
+  /** READ ONE */
+  async findOne(id: number): Promise<Supplier> {
+    const { data, error } = await this.supabase
+      .from('suppliers')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  async update(id: number, dto: UpdateSupplierDto) {
-    const supplier = await this.supplierRepository.preload({
-      id,
-      ...dto,
-    });
-
-    if (!supplier) {
+    if (error || !data) {
       throw new NotFoundException(`Supplier with id ${id} not found`);
     }
-
-    return this.supplierRepository.save(supplier);
+    return data;
   }
 
-  async remove(id: number) {
-    const supplier = await this.findOne(id);
-    if (!supplier) {
-      throw new NotFoundException(`Supplier with id ${id} not found`);
-    }
-    return this.supplierRepository.remove(supplier);
+  /** UPDATE */
+  async update(id: number, dto: UpdateSupplierDto): Promise<Supplier> {
+    const { data, error } = await this.supabase
+      .from('suppliers')
+      .update(dto)
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error) throw new NotFoundException(`Supplier with id ${id} not found`);
+    return data;
+  }
+
+  /** DELETE */
+  async remove(id: number): Promise<void> {
+    const { error } = await this.supabase
+      .from('suppliers')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw new NotFoundException(`Supplier with id ${id} not found`);
   }
 }
