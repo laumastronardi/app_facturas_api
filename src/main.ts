@@ -12,7 +12,6 @@ async function bootstrap() {
 
   app.enableCors();
 
-
   const config = new DocumentBuilder()
     .setTitle('Invoices API')
     .setDescription('API to manage suppliers and invoices')
@@ -21,10 +20,9 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
-  
-  const port = process.env.PORT || 3000;
-  await app.listen(port ?? 3000, '0.0.0.0');
 
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
   console.log(`🚀 Application listening on http://0.0.0.0:${port}`);
 }
 bootstrap();
