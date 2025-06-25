@@ -1,6 +1,6 @@
 // src/invoices/invoices.service.ts
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { buildPaginatedResponse } from 'src/common/utils/paginate-response';
+import { buildPaginatedResponse } from '../../../common/utils/paginate-response';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateInvoiceDto } from '../dto/create-invoice.dto';
 import { UpdateInvoiceDto } from '../dto/update-invoice.dto';
