@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import serverless from 'serverless-http';
-import { AppModule } from 'src/app.module';
+import { AppModule } from '../src/app.module'; // <-- Import relativo
 
 const server = express();
 let app: any;
