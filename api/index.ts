@@ -4,17 +4,16 @@ import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import serverless from 'serverless-http';
-import { AppModule } from '../src/app.module'; // Import relativo
+import { AppModule } from '../src/app.module';
 
 const server = express();
-let isBootstrapped = false;
+let nestApp: any = null;
 
 async function bootstrap() {
-  if (!isBootstrapped) {
-    const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
-    app.enableCors();
-    await app.init();
-    isBootstrapped = true;
+  if (!nestApp) {
+    nestApp = await NestFactory.create(AppModule, new ExpressAdapter(server));
+    nestApp.enableCors();
+    await nestApp.init();
   }
 }
 
