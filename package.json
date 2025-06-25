@@ -22,9 +22,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "typeorm-ts-node-commonjs",
-    "migration:custom": "ts-node -r tsconfig-paths/register run-migration.ts"
+    "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@faker-js/faker": "^9.8.0",
@@ -34,14 +32,11 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.0",
-    "@nestjs/typeorm": "^11.0.0",
     "@supabase/supabase-js": "^2.50.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "express": "^5.1.0",
     "lucide-react": "^0.522.0",
-    "mysql2": "^3.14.1",
-    "pg": "^8.16.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "serverless-http": "^3.2.0",
