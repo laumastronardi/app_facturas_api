@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SupabaseService } from '../supabase/supabase.service';
-import { User, UserResponse } from './entities/user.entity';
+import { UserResponse } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 
 export interface LoginDto {
@@ -48,11 +48,13 @@ export class AuthService {
     // Crear usuario
     const { data: user, error } = await this.supabase
       .from('users')
-      .insert([{
-        email,
-        password_hash: passwordHash,
-        name,
-      }])
+      .insert([
+        {
+          email,
+          password_hash: passwordHash,
+          name,
+        },
+      ])
       .select('id, email, name, created_at, updated_at')
       .single();
 
@@ -89,7 +91,6 @@ export class AuthService {
 
     // Retornar usuario sin password_hash
     const { password_hash, ...userResponse } = user;
-
     return {
       user: userResponse,
       access_token,
