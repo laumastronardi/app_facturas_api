@@ -15,11 +15,23 @@ export class Invoice {
   @Column({ type: 'date' })
   date: Date;
 
-  @Column('decimal')
+  @Column('decimal', { precision: 10, scale: 2 })
   amount: number;
 
-  @Column('decimal', { default: 0 })
-  vat: number;
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  amount_105: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  total_neto: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  vat_amount_21: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  vat_amount_105: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  total_amount: number;
 
   @Column({ type: 'enum', enum: InvoiceStatus })
   status: InvoiceStatus;
@@ -27,8 +39,12 @@ export class Invoice {
   @ManyToOne(() => Supplier, (supplier) => supplier.invoices)
   supplier: Supplier;
 
-  @Column({ type: 'enum', enum: ['A', 'X'] })
-  type: 'A' | 'X';
+  @Column({ 
+    type: 'enum', 
+    enum: ['A', 'X'], 
+    name: 'invoice_type' 
+  })
+  invoiceType: 'A' | 'X';
 
   @Column({ type: 'date', nullable: true })
   paymentDate?: Date;

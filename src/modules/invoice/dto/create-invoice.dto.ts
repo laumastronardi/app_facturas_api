@@ -16,25 +16,37 @@ export enum InvoiceType {
   X = 'X',
 }
 
-export enum VatRate {
-  IVA_21 = 21,
-  IVA_105 = 10.5,
-}
-
 export class CreateInvoiceDto {
   @Type(() => Number)
   @IsNotEmpty()
   supplierId: number;
 
   @IsNumber()
+  @Min(0)
   amount: number;
 
   @IsEnum(InvoiceType)
   type: InvoiceType;
 
-  @IsOptional()
-  @IsEnum(VatRate)
-  vat?: VatRate;
+  @IsNumber()
+  @Min(0)
+  amount_105: number;
+
+  @IsNumber()
+  @Min(0)
+  total_neto: number;
+
+  @IsNumber()
+  @Min(0)
+  vat_amount_21: number;
+
+  @IsNumber()
+  @Min(0)
+  vat_amount_105: number;
+
+  @IsNumber()
+  @Min(0)
+  total_amount: number;
 
   @IsOptional()
   @IsDateString()

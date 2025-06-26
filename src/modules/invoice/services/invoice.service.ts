@@ -13,14 +13,17 @@ export class InvoiceService {
 
   /** CREATE */
   async create(dto: CreateInvoiceDto): Promise<Invoice> {
-
-      const payload = {
-      date:        dto.date,
-      amount:      dto.amount,
-      status:      dto.status,
+    const payload = {
+      date: dto.date,
+      amount: dto.amount,
+      status: dto.status,
       supplier_id: dto.supplierId,
-      type:        dto.type,
-      vat:         dto.vat,
+      type: dto.type,
+      amount_105: dto.amount_105 || 0,
+      total_neto: dto.total_neto || 0,
+      vat_amount_21: dto.vat_amount_21 || 0,
+      vat_amount_105: dto.vat_amount_105 || 0,
+      total_amount: dto.total_amount || 0,
     };
 
     const { data, error } = await this.supabase
@@ -81,8 +84,12 @@ export class InvoiceService {
         amount: dto.amount,
         status: dto.status,
         type: dto.type,
-        vat: dto.vat,
-        supplier_id: dto.supplierId,  // <-- aquí también
+        supplier_id: dto.supplierId,
+        amount_105: dto.amount_105,
+        total_neto: dto.total_neto,
+        vat_amount_21: dto.vat_amount_21,
+        vat_amount_105: dto.vat_amount_105,
+        total_amount: dto.total_amount,
       })  
       .eq('id', id)
       .select('*')
