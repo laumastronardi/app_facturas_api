@@ -9,6 +9,7 @@ export class SupabaseService {
   private readonly client: SupabaseClient;
 
   constructor(private readonly cfg: ConfigService) {
+    console.log('SupabaseService: constructor');
     this.client = createClient(
       cfg.get<string>('SUPABASE_URL')!,
       cfg.get<string>('SUPABASE_SERVICE_ROLE_KEY')!,

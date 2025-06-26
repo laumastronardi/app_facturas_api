@@ -4,6 +4,8 @@ import { InvoiceModule } from './modules/invoice/invoice.module';
 import { SupabaseModule } from './supabase/supabase.module';
 import { ConfigModule } from '@nestjs/config';
 
+console.log('AppModule: before @Module');
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -15,4 +17,8 @@ import { ConfigModule } from '@nestjs/config';
     InvoiceModule,
   ]
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    console.log('AppModule: constructor');
+  }
+}

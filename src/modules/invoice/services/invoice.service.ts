@@ -9,7 +9,9 @@ import { Invoice, InvoiceStatus } from '../entities/invoice.entity';
 
 @Injectable()
 export class InvoiceService {
-  constructor(private readonly supabase: SupabaseService) {}
+  constructor(private readonly supabase: SupabaseService) {
+    console.log('InvoiceService: constructor');
+  }
 
   /** CREATE */
   async create(dto: CreateInvoiceDto): Promise<Invoice> {

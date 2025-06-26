@@ -4,9 +4,15 @@ import { SupabaseModule } from 'src/supabase/supabase.module';
 import { SupplierService } from './services/supplier.service';
 import { SupplierController } from './controllers/supplier.controller';
 
+console.log('SupplierModule: before @Module');
+
 @Module({
   imports: [SupabaseModule],
   controllers: [SupplierController],
   providers: [SupplierService],
 })
-export class SupplierModule {}
+export class SupplierModule {
+  constructor() {
+    console.log('SupplierModule: constructor');
+  }
+}

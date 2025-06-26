@@ -5,7 +5,9 @@ import { Supplier } from '../entities/supplier.entity';
 import { UpdateSupplierDto } from '../dto/update-supplier.dto';
 @Injectable()
 export class SupplierService {
-  constructor(private readonly supabase: SupabaseService) {}
+  constructor(private readonly supabase: SupabaseService) {
+    console.log('SupplierService: constructor');
+  }
 
   /** CREATE */
   async create(dto: CreateSupplierDto): Promise<Supplier> {
