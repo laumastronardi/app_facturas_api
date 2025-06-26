@@ -1,28 +1,23 @@
-require('tsconfig-paths/register');
-console.log('Handler loaded');
-
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
-import serverless from 'serverless-http';
 import { AppModule } from '../src/app.module';
+import serverlessExpress from '@vendia/serverless-express';
 
-let nestApp: any = null;
+let cachedServer: any;
 
-async function bootstrap() {
-  if (!nestApp) {
-    const expressInstance = express();
-    nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressInstance));
+async function bootstrapServer() {
+  if (!cachedServer) {
+    const expressApp = express();
+    const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
     nestApp.enableCors();
     await nestApp.init();
-    (nestApp as any).expressInstance = expressInstance;
-    console.log('Nest app bootstrapped');
+    cachedServer = serverlessExpress({ app: expressApp });
   }
-  return (nestApp as any).expressInstance;
+  return cachedServer;
 }
 
-export default serverless(async (req, res) => {
-  console.log('Request received');
-  const expressInstance = await bootstrap();
-  return expressInstance(req, res);
-});
+export default async function handler(event: any, context: any) {
+  const server = await bootstrapServer();
+  return server(event, context);
+}
