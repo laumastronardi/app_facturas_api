@@ -3,11 +3,10 @@ import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateSupplierDto } from '../dto/create-supplier.dto';
 import { Supplier } from '../entities/supplier.entity';
 import { UpdateSupplierDto } from '../dto/update-supplier.dto';
+
 @Injectable()
 export class SupplierService {
-  constructor(private readonly supabase: SupabaseService) {
-    console.log('SupplierService: constructor');
-  }
+  constructor(private readonly supabase: SupabaseService) {}
 
   /** CREATE */
   async create(dto: CreateSupplierDto): Promise<Supplier> {

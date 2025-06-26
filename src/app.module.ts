@@ -4,13 +4,10 @@ import { InvoiceModule } from './modules/invoice/invoice.module';
 import { SupabaseModule } from './supabase/supabase.module';
 import { ConfigModule } from '@nestjs/config';
 
-console.log('AppModule: before @Module');
-
 @Controller()
 export class AppController {
   @Get()
   getHello(): { message: string; status: string; timestamp: string } {
-    console.log('AppController: GET / called');
     return {
       message: 'Bills API is running!',
       status: 'OK',
@@ -23,7 +20,7 @@ export class AppController {
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env'],  // o el path correcto a tu .env
+      envFilePath: ['.env'],
     }),
     SupabaseModule,
     SupplierModule,
@@ -31,8 +28,4 @@ export class AppController {
   ],
   controllers: [AppController]
 })
-export class AppModule {
-  constructor() {
-    console.log('AppModule: constructor');
-  }
-}
+export class AppModule {}

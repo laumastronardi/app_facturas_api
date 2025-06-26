@@ -22,7 +22,14 @@ export class InvoiceController {
   ) {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
-    return this.invoiceService.findAll({ ...filters, page: pageNum, limit: limitNum });
+    
+    // Transformar status si es un string separado por comas
+    let processedFilters = { ...filters };
+    if (typeof filters.status === 'string' && filters.status.includes(',')) {
+      processedFilters.status = filters.status.split(',').map(s => s.trim());
+    }
+    
+    return this.invoiceService.findAll({ ...processedFilters, page: pageNum, limit: limitNum });
   }
 
   @Get(':id')

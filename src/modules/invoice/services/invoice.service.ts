@@ -1,4 +1,4 @@
-// src/invoices/invoices.service.ts
+// src/modules/invoice/services/invoice.service.ts
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { buildPaginatedResponse } from '../../../common/utils/paginate-response';
 import { SupabaseService } from 'src/supabase/supabase.service';
@@ -9,9 +9,7 @@ import { Invoice, InvoiceStatus } from '../entities/invoice.entity';
 
 @Injectable()
 export class InvoiceService {
-  constructor(private readonly supabase: SupabaseService) {
-    console.log('InvoiceService: constructor');
-  }
+  constructor(private readonly supabase: SupabaseService) {}
 
   /** CREATE */
   async create(dto: CreateInvoiceDto): Promise<Invoice> {

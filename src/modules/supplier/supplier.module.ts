@@ -1,18 +1,12 @@
 import { Module } from '@nestjs/common';
-import { Supplier } from './entities/supplier.entity';
-import { SupabaseModule } from 'src/supabase/supabase.module';
-import { SupplierService } from './services/supplier.service';
 import { SupplierController } from './controllers/supplier.controller';
-
-console.log('SupplierModule: before @Module');
+import { SupplierService } from './services/supplier.service';
+import { SupabaseModule } from '../../supabase/supabase.module';
 
 @Module({
   imports: [SupabaseModule],
   controllers: [SupplierController],
   providers: [SupplierService],
+  exports: [SupplierService],
 })
-export class SupplierModule {
-  constructor() {
-    console.log('SupplierModule: constructor');
-  }
-}
+export class SupplierModule {}

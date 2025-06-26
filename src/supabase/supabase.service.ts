@@ -1,24 +1,22 @@
 // src/supabase/supabase.service.ts
 
-import { Injectable }      from '@nestjs/common';
-import { ConfigService }   from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class SupabaseService {
-  private readonly client: SupabaseClient;
+  private supabase: SupabaseClient;
 
-  constructor(private readonly cfg: ConfigService) {
-    console.log('SupabaseService: constructor');
-    this.client = createClient(
-      cfg.get<string>('SUPABASE_URL')!,
-      cfg.get<string>('SUPABASE_SERVICE_ROLE_KEY')!,
+  constructor() {
+    this.supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!
     );
   }
 
   /** Si necesitas acceso total al cliente: */
   get raw(): SupabaseClient {
-    return this.client;
+    return this.supabase;
   }
 
   /**
@@ -27,6 +25,6 @@ export class SupabaseService {
    * pasar el genérico exacto donde hagas .select<Invoice>()
    */
   from(table: string) {
-    return this.client.from(table);
+    return this.supabase.from(table);
   }
 }
