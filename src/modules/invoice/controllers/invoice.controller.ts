@@ -4,19 +4,22 @@ import { CreateInvoiceDto } from '../dto/create-invoice.dto';
 import { UpdateInvoiceDto } from '../dto/update-invoice.dto';
 import { FilterInvoicesDto } from '../dto/filter-invoice.dto';
 import { buildPaginatedResponse } from 'src/common/utils/paginate-response';
+import { CurrentUser } from '../../../auth/user.decorator';
+import { UserResponse } from '../../../auth/entities/user.entity';
 
 @Controller('invoices')
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
 
   @Post()
-  create(@Body() dto: CreateInvoiceDto) {
+  create(@Body() dto: CreateInvoiceDto, @CurrentUser() user: UserResponse) {
     return this.invoiceService.create(dto);
   }
 
   @Get()
   findAll(
     @Query() filters: Omit<FilterInvoicesDto,'page'|'limit'>,
+    @CurrentUser() user: UserResponse,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
