@@ -23,9 +23,16 @@ async function bootstrap() {
 export default async function handler(req: any, res: any) {
   console.log(`Handler called: ${req.method} ${req.url}`);
   console.log('Request path:', req.path);
+  console.log('Request originalUrl:', req.originalUrl);
   
   const nestApp = await bootstrap();
   const expressApp = nestApp.getHttpAdapter().getInstance();
   
-  return expressApp(req, res);
+  // Ensure the request has the correct path
+  if (!req.path && req.url) {
+    req.path = req.url;
+  }
+  
+  // Handle the request
+  expressApp(req, res);
 } 
