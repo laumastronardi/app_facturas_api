@@ -16,11 +16,13 @@ export class InvoiceController {
 
   @Get()
   findAll(
-    @Query()        filters: Omit<FilterInvoicesDto,'page'|'limit'>,
-    @Query('page',  ParseIntPipe)   page: number = 1,
-    @Query('limit', ParseIntPipe)   limit: number = 10,
+    @Query() filters: Omit<FilterInvoicesDto,'page'|'limit'>,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    return this.invoiceService.findAll({ ...filters, page, limit });
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.invoiceService.findAll({ ...filters, page: pageNum, limit: limitNum });
   }
 
   @Get(':id')
