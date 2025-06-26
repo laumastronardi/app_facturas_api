@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, UnauthorizedException } from '@nestjs/common';
 import { Public } from './public.decorator';
 import { CurrentUser } from './user.decorator';
 import { UserResponse } from './entities/user.entity';
@@ -23,6 +23,9 @@ export class AuthController {
 
   @Get('profile')
   getProfile(@CurrentUser() user: UserResponse): UserResponse {
+    if (!user) {
+      throw new UnauthorizedException('No user found');
+    }
     return user;
   }
 
