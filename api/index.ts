@@ -23,12 +23,13 @@ async function bootstrap() {
 export default async function handler(req: any, res: any) {
   console.log(`Handler called: ${req.method} ${req.url}`);
   
-  // Fix the request object for Vercel
+  // Fix the request object for Vercel and remove /api prefix
   if (req.url && !req.path) {
-    req.path = req.url;
-  }
-  if (req.url && !req.originalUrl) {
-    req.originalUrl = req.url;
+    // Remove /api prefix from the path
+    const path = req.url.startsWith('/api') ? req.url.substring(4) : req.url;
+    req.path = path;
+    req.originalUrl = path;
+    req.url = path;
   }
   
   console.log('Fixed request path:', req.path);
