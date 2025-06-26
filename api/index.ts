@@ -26,8 +26,10 @@ async function bootstrap() {
 
 export default async function handler(req: Request, res: Response) {
   console.log(`Handler called: ${req.method} ${req.url}`);
-  console.log('Request headers:', req.headers);
+  console.log('Request path:', req.path);
+  console.log('Request originalUrl:', req.originalUrl);
   
+  // Handle the request
   const app = await bootstrap();
   app(req, res);
 }
