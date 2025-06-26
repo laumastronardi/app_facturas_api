@@ -1,5 +1,8 @@
 {
+  "version": 2,
   "functions": {
-    "api/test.ts": {}
+    "api/test.ts": {
+      "runtime": "@vercel/node@18"
+    }
   }
 }
