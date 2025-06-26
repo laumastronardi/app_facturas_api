@@ -22,16 +22,20 @@ async function bootstrap() {
 
 export default async function handler(req: any, res: any) {
   console.log(`Handler called: ${req.method} ${req.url}`);
-  console.log('Request path:', req.path);
-  console.log('Request originalUrl:', req.originalUrl);
+  
+  // Fix the request object for Vercel
+  if (req.url && !req.path) {
+    req.path = req.url;
+  }
+  if (req.url && !req.originalUrl) {
+    req.originalUrl = req.url;
+  }
+  
+  console.log('Fixed request path:', req.path);
+  console.log('Fixed request originalUrl:', req.originalUrl);
   
   const nestApp = await bootstrap();
   const expressApp = nestApp.getHttpAdapter().getInstance();
-  
-  // Ensure the request has the correct path
-  if (!req.path && req.url) {
-    req.path = req.url;
-  }
   
   // Handle the request
   expressApp(req, res);
