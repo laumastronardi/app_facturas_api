@@ -1,146 +1,19 @@
-import express, { Request, Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from '../src/app.module';
 
-// Initialize Supabase
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+let app: any = null;
 
-export default function handler(req: Request, res: Response) {
-  console.log(`Handler called: ${req.method} ${req.url} - Path: ${req.path}`);
-  
-  const app = express();
-  app.use(express.json());
-  
-  // Health check
-  app.get('/', (req: Request, res: Response) => {
-    res.json({
-      message: 'Bills API is running!',
-      status: 'OK',
-      timestamp: new Date().toISOString()
-    });
-  });
-
-  // Suppliers routes
-  app.get('/suppliers/health', (req: Request, res: Response) => {
-    res.json({ status: 'OK' });
-  });
-
-  app.get('/suppliers', async (req: Request, res: Response) => {
-    try {
-      const { data, error } = await supabase
-        .from('suppliers')
-        .select('*');
-      
-      if (error) throw error;
-      res.json(data);
-    } catch (error) {
-      console.error('Error fetching suppliers:', error);
-      res.status(500).json({ error: 'Failed to fetch suppliers' });
-    }
-  });
-
-  app.post('/suppliers', async (req: Request, res: Response) => {
-    try {
-      const { data, error } = await supabase
-        .from('suppliers')
-        .insert(req.body)
-        .select();
-      
-      if (error) throw error;
-      res.status(201).json(data[0]);
-    } catch (error) {
-      console.error('Error creating supplier:', error);
-      res.status(500).json({ error: 'Failed to create supplier' });
-    }
-  });
-
-  app.get('/suppliers/:id', async (req: Request, res: Response) => {
-    try {
-      const { data, error } = await supabase
-        .from('suppliers')
-        .select('*')
-        .eq('id', req.params.id)
-        .single();
-      
-      if (error) throw error;
-      if (!data) {
-        res.status(404).json({ error: 'Supplier not found' });
-        return;
-      }
-      res.json(data);
-    } catch (error) {
-      console.error('Error fetching supplier:', error);
-      res.status(500).json({ error: 'Failed to fetch supplier' });
-    }
-  });
-
-  // Invoices routes
-  app.get('/invoices', async (req: Request, res: Response) => {
-    try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*');
-      
-      if (error) throw error;
-      res.json(data);
-    } catch (error) {
-      console.error('Error fetching invoices:', error);
-      res.status(500).json({ error: 'Failed to fetch invoices' });
-    }
-  });
-
-  app.post('/invoices', async (req: Request, res: Response) => {
-    try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .insert(req.body)
-        .select();
-      
-      if (error) throw error;
-      res.status(201).json(data[0]);
-    } catch (error) {
-      console.error('Error creating invoice:', error);
-      res.status(500).json({ error: 'Failed to create invoice' });
-    }
-  });
-
-  app.get('/invoices/:id', async (req: Request, res: Response) => {
-    try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('id', req.params.id)
-        .single();
-      
-      if (error) throw error;
-      if (!data) {
-        res.status(404).json({ error: 'Invoice not found' });
-        return;
-      }
-      res.json(data);
-    } catch (error) {
-      console.error('Error fetching invoice:', error);
-      res.status(500).json({ error: 'Failed to fetch invoice' });
-    }
-  });
-
-  // 404 handler
-  app.use((req: Request, res: Response) => {
-    console.log(`404 - Route not found: ${req.method} ${req.url}`);
-    res.status(404).json({
-      error: 'Route not found',
-      requestedUrl: req.url,
-      requestedPath: req.path,
-      availableRoutes: [
-        '/',
-        '/suppliers',
-        '/suppliers/health',
-        '/invoices'
-      ]
-    });
-  });
-
-  // Handle the request
-  app(req, res);
+async function bootstrap() {
+  if (!app) {
+    app = await NestFactory.create(AppModule);
+    await app.init();
+  }
+  return app;
 }
+
+export default async function handler(req: any, res: any) {
+  const nestApp = await bootstrap();
+  const expressApp = nestApp.getHttpAdapter().getInstance();
+  
+  return expressApp(req, res);
+} 
