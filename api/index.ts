@@ -16,7 +16,6 @@ async function bootstrap() {
   }
   return app;
 }
-
 export default serverless(async (req: any, res: any) => {
   const expressApp = await bootstrap();
   return expressApp(req, res);
