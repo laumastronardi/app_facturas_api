@@ -1,35 +1,23 @@
 import { NestFactory } from '@nestjs/core';
-import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from '../src/app.module';
-import { INestApplication } from '@nestjs/common';
-import express, { Request, Response } from 'express';
+import serverless from 'serverless-http';
 
-const server = express();
-let nestApp: INestApplication | null = null;
+let app: any = null;
 
 async function bootstrap() {
-  if (!nestApp) {
-    console.log('Creating NestJS app...');
-    nestApp = await NestFactory.create(AppModule, new ExpressAdapter(server));
-    
-    // Set global prefix to empty string since Vercel handles the /api prefix
-    nestApp.setGlobalPrefix('');
+  if (!app) {
+    const nestApp = await NestFactory.create(AppModule);
     
     // Enable CORS
     nestApp.enableCors();
     
-    await nestApp.init();
-    console.log('NestJS app initialized successfully');
+    // Get the Express app
+    app = nestApp.getHttpAdapter().getInstance();
   }
-  return server;
+  return app;
 }
 
-export default async function handler(req: Request, res: Response) {
-  console.log(`Handler called: ${req.method} ${req.url}`);
-  console.log('Request path:', req.path);
-  console.log('Request originalUrl:', req.originalUrl);
-  
-  // Handle the request
-  const app = await bootstrap();
-  app(req, res);
-}
+export default serverless(async (req: any, res: any) => {
+  const expressApp = await bootstrap();
+  return expressApp(req, res);
+});
