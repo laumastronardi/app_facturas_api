@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../src/app.module';
+import { AuthGuard } from '../src/auth/auth.guard';
 
 let app: any = null;
 
@@ -12,7 +13,11 @@ async function bootstrap() {
     
     // Set global prefix to empty string since Vercel handles the /api prefix
     app.setGlobalPrefix('');
-    
+
+    // Aplicar el guard global
+    const authGuard = app.get(AuthGuard);
+    app.useGlobalGuards(authGuard);
+
     await app.init();
   }
   return app;
