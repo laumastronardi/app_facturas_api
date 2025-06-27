@@ -37,16 +37,14 @@ export class InvoiceService {
   }
 
   /** LIST with filters + pagination */
-  async findAll(filters: FilterInvoicesDto & { page?: number; limit?: number }) {
-    const { status, type, supplierId, fromDate, toDate, page = 1, limit = 10 } = filters;
+  async findAll(filters: FilterInvoicesDto & { page?: number; limit?: number; sortBy?: string; sortOrder?: 'asc' | 'desc' }) {
+    const { status, type, supplierId, fromDate, toDate, page = 1, limit = 10, sortBy, sortOrder } = filters;
     const from = (page - 1) * limit;
     const to   = page * limit - 1;
 
-    // armamos query HTTP a Supabase
     let qb = this.supabase
       .from('invoice')
       .select('*, supplier(*)', { count: 'exact' })
-      .order('date', { ascending: false })
       .range(from, to);
 
     if (status)     qb = Array.isArray(status)
@@ -57,10 +55,29 @@ export class InvoiceService {
     if (fromDate)   qb = qb.gte('date', fromDate);
     if (toDate)     qb = qb.lte('date', toDate);
 
+    // Ordenamiento
+    if (sortBy === 'date') {
+      qb = qb.order('date', { ascending: sortOrder === 'asc' });
+    } else {
+      qb = qb.order('date', { ascending: false }); // default
+    }
+
     const { data, error, count } = await qb;
     if (error) throw new BadRequestException(error.message);
 
-    return buildPaginatedResponse(data ?? [], count ?? 0, page, limit);
+    let result = data ?? [];
+    // Ordenar por nombre de proveedor en memoria si se solicita
+    if (sortBy === 'supplier.name') {
+      result = result.sort((a, b) => {
+        const nameA = a.supplier?.name?.toLowerCase() || '';
+        const nameB = b.supplier?.name?.toLowerCase() || '';
+        if (nameA < nameB) return sortOrder === 'desc' ? 1 : -1;
+        if (nameA > nameB) return sortOrder === 'desc' ? -1 : 1;
+        return 0;
+      });
+    }
+
+    return buildPaginatedResponse(result, count ?? 0, page, limit);
   }
 
   /** READ one by id */
