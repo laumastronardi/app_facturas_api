@@ -6,6 +6,8 @@ export class Supplier {
 
   name: string;
 
+  cuit: string;
+
   cbu: string;
 
   paymentTerm: number;

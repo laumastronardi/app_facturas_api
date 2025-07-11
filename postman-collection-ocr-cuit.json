@@ -1,0 +1,148 @@
+{
+  "info": {
+    "name": "Bills API - OCR Test con CUIT",
+    "description": "Pruebas de la funcionalidad OCR con identificación automática por CUIT",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "tu_token_aqui",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Autenticación - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"tu@email.com\",\n  \"password\": \"tu_password\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "2. Listar Proveedores (verificar CUIT)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/suppliers",
+          "host": ["{{base_url}}"],
+          "path": ["suppliers"]
+        }
+      }
+    },
+    {
+      "name": "3. OCR MOCK - Procesar imagen (DEMO)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "ruta/a/tu/imagen.jpg"
+            },
+            {
+              "key": "confidenceThreshold",
+              "value": "70",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/invoices/process-image-mock",
+          "host": ["{{base_url}}"],
+          "path": ["invoices", "process-image-mock"]
+        }
+      }
+    },
+    {
+      "name": "4. Crear Factura con Auto-CUIT",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"invoiceData\": {\n    \"amount\": 10000,\n    \"amount_105\": 1050,\n    \"total_neto\": 10000,\n    \"vat_amount_21\": 2100,\n    \"vat_amount_105\": 1050,\n    \"total_amount\": 13150,\n    \"date\": \"2024-01-15\",\n    \"type\": \"A\",\n    \"status\": \"TO_PAY\"\n  },\n  \"supplierInfo\": {\n    \"name\": \"Ferriplast\",\n    \"cuit\": \"30-71234567-8\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/invoices/create-from-ocr-auto",
+          "host": ["{{base_url}}"],
+          "path": ["invoices", "create-from-ocr-auto"]
+        }
+      }
+    },
+    {
+      "name": "5. OCR REAL - Procesar imagen real",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "ruta/a/tu/imagen_real.jpg"
+            },
+            {
+              "key": "confidenceThreshold",
+              "value": "70",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/invoices/process-image",
+          "host": ["{{base_url}}"],
+          "path": ["invoices", "process-image"]
+        }
+      }
+    }
+  ]
+}

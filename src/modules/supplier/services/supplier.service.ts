@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { SupabaseService } from 'src/supabase/supabase.service';
+import { SupabaseService } from '../../../supabase/supabase.service';
 import { CreateSupplierDto } from '../dto/create-supplier.dto';
 import { Supplier } from '../entities/supplier.entity';
 import { UpdateSupplierDto } from '../dto/update-supplier.dto';
+import { formatCuit, validateCuit } from '../../../common/utils/cuit-validator';
 
 @Injectable()
 export class SupplierService {
@@ -10,9 +11,35 @@ export class SupplierService {
 
   /** CREATE */
   async create(dto: CreateSupplierDto): Promise<Supplier> {
+    // Validar y formatear CUIT
+    if (dto.cuit && !validateCuit(dto.cuit)) {
+      throw new BadRequestException('El CUIT proporcionado no es válido');
+    }
+
+    // Formatear CUIT al formato estándar
+    const formattedDto = {
+      ...dto,
+      cuit: dto.cuit ? formatCuit(dto.cuit) : dto.cuit
+    };
+
+    // Verificar que no exista otro proveedor con el mismo CUIT
+    if (formattedDto.cuit) {
+      const { data: existingSupplier } = await this.supabase
+        .from('supplier')
+        .select('id, name')
+        .eq('cuit', formattedDto.cuit)
+        .single();
+
+      if (existingSupplier) {
+        throw new BadRequestException(
+          `Ya existe un proveedor con el CUIT ${formattedDto.cuit}: ${existingSupplier.name}`
+        );
+      }
+    }
+
     const { data, error } = await this.supabase
       .from('supplier')
-      .insert(dto)
+      .insert(formattedDto)
       .select('*')
       .single();
 
@@ -46,6 +73,32 @@ export class SupplierService {
 
   /** UPDATE */
   async update(id: number, dto: UpdateSupplierDto): Promise<Supplier> {
+    // Si se está actualizando el CUIT, validarlo
+    if (dto.cuit !== undefined) {
+      if (dto.cuit && !validateCuit(dto.cuit)) {
+        throw new BadRequestException('El CUIT proporcionado no es válido');
+      }
+
+      // Formatear CUIT al formato estándar
+      dto.cuit = dto.cuit ? formatCuit(dto.cuit) : dto.cuit;
+
+      // Verificar que no exista otro proveedor con el mismo CUIT
+      if (dto.cuit) {
+        const { data: existingSupplier } = await this.supabase
+          .from('supplier')
+          .select('id, name')
+          .eq('cuit', dto.cuit)
+          .neq('id', id) // Excluir el proveedor actual
+          .single();
+
+        if (existingSupplier) {
+          throw new BadRequestException(
+            `Ya existe otro proveedor con el CUIT ${dto.cuit}: ${existingSupplier.name}`
+          );
+        }
+      }
+    }
+
     const { data, error } = await this.supabase
       .from('supplier')
       .update(dto)
