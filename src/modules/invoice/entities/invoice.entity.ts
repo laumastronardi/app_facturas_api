@@ -22,6 +22,10 @@ export class Invoice {
 
   vat_amount_105: number;
 
+  has_ii_bb: boolean;
+
+  ii_bb_amount: number;
+
   total_amount: number;
 
   status: InvoiceStatus;

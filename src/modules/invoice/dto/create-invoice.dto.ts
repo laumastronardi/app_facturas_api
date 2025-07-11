@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsBoolean,
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -43,6 +44,15 @@ export class CreateInvoiceDto {
   @IsNumber()
   @Min(0)
   vat_amount_105: number;
+
+  @IsOptional()
+  @IsBoolean()
+  has_ii_bb?: boolean = false;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  ii_bb_amount?: number = 0;
 
   @IsNumber()
   @Min(0)

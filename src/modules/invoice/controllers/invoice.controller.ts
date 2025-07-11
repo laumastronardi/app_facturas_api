@@ -119,7 +119,7 @@ export class InvoiceController {
     }
 
     try {
-      const ocrResult = await this.ocrService.processInvoiceImage(file.buffer);
+      const ocrResult = await this.ocrService.processInvoiceImage(file.buffer, dto);
       
       // Verificar umbral de confianza
       if (ocrResult.confidence < (dto.confidenceThreshold || 95)) {
@@ -137,7 +137,10 @@ export class InvoiceController {
         invoiceData: ocrResult.invoiceData,
         confidence: ocrResult.confidence,
         extractedText: ocrResult.extractedText,
-        supplierInfo: ocrResult.supplierInfo,
+        supplierInfo: ocrResult.supplierInfo ? {
+          name: ocrResult.supplierInfo.name,
+          cuit: ocrResult.supplierInfo.cuit || null,
+        } : undefined,
         requiresSupplierSelection: !ocrResult.invoiceData.supplierId,
       };
     } catch (error) {
@@ -220,7 +223,7 @@ export class InvoiceController {
       extractedText: "DEMO: Datos simulados - Factura A, Proveedor Test, Total: $13,150.00",
       supplierInfo: {
         name: "Proveedor Test DEMO",
-        cuit: "20-12345678-9"
+        cuit: "20-12345678-9" as string | null
       },
       requiresSupplierSelection: !dto.supplierId,
     };

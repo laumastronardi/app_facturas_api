@@ -23,7 +23,10 @@ export class InvoiceService {
       total_neto: dto.total_neto || 0,
       vat_amount_21: dto.vat_amount_21 || 0,
       vat_amount_105: dto.vat_amount_105 || 0,
+      has_ii_bb: dto.has_ii_bb || false,
+      ii_bb_amount: dto.ii_bb_amount || 0,
       total_amount: dto.total_amount || 0,
+      payment_date: dto.paymentDate,
     };
 
     const { data, error } = await this.supabase
@@ -106,6 +109,8 @@ export class InvoiceService {
         total_neto: dto.total_neto,
         vat_amount_21: dto.vat_amount_21,
         vat_amount_105: dto.vat_amount_105,
+        has_ii_bb: dto.has_ii_bb,
+        ii_bb_amount: dto.ii_bb_amount,
         total_amount: dto.total_amount,
       })  
       .eq('id', id)
